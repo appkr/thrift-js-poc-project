@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Apache Thrift - JS PoC Client</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+  <div id="app" class="container" style="margin-top:2em;">
+    <div class="text-center" style="margin-bottom:2em;">
+      <button class="btn btn-primary" @click="testAll">
+        testAll
+      </button>
+      <button class="btn btn-primary" @click="testFind">
+        testFind
+      </button>
+      <button class="btn btn-primary" @click="testStore">
+        testStore
+      </button>
+    </div>
+
+    <pre v-if="responseBody">
+      <code>
+      {{ responseBody }}
+      </code>
+    </pre>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.js"></script>
+  <script src="/node_modules/thrift/lib/js/src/thrift.js"></script>
+  <script src="/node_modules/thrift-example-idl/dist-js/Post_types.js"></script>
+  <script src="/node_modules/thrift-example-idl/dist-js/Errors_types.js"></script>
+  <script src="/node_modules/thrift-example-idl/dist-js/PostService.js"></script>
+
+  <script>
+    const transport = new Thrift.Transport('http://localhost:8000/api/posts');
+    const protocol  = new Thrift.Protocol(transport);
+    const client = new Appkr.Thrift.Post.PostServiceClient(protocol);
+
+    const vue = new Vue({
+      el: '#app',
+
+      data: {
+        responseBody: ''
+      },
+
+      methods: {
+        testAll: () => {
+          const queryFilter = new Appkr.Thrift.Post.QueryFilter({
+            keyword:'Lorem',
+            sortBy:'id',
+            sortDirection:'desc'
+          });
+
+          client.all(queryFilter, 0, 10, (response) => {
+            console.log(vue, response, response[0].title);
+            return vue.responseBody = response;
+          });
+        },
+
+        testFind: () => {
+          client.find(1, (response) => {
+            console.log(response);
+            return vue.responseBody = response;
+          })
+        },
+
+        testStore: () => {
+          const post = new Appkr.Thrift.Post.Post({
+            title: 'foo',
+            content: 'Lorem content'
+          });
+
+          client.store(post, (response) => {
+            console.log(response);
+            return vue.responseBody = response;
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

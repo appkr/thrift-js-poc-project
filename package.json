@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "thrift": "https://github.com/apache/thrift.git",
+    "thrift-example-idl": "https://github.com/appkr/thrift-example-idl.git"
+  }
+}
